@@ -1,6 +1,7 @@
 import os
 from dotenv import load_dotenv
 import openai
+import pinecone
 
 
 load_dotenv()
@@ -20,3 +21,13 @@ res = openai.Embedding.create(
 )
 
 embeds = [record["embedding"] for record in res["data"]]
+pinecone.init(
+    api_key=os.getenv("PINECONE_API_KEY"),
+    environment=os.getenv("PINECONE_ENV")
+)
+
+# Create a Pinecone index
+if 'openai' not in pinecone.list_indexes():
+    pinecone.create_index('openai', dimension=len(embeds[0]))
+# Connect to the index
+index = pinecone.Index('openai')
